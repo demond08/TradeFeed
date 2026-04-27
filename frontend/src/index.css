@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter+Tight:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -11,8 +11,8 @@ html, body, #root {
 
 body {
   margin: 0;
-  font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: -0.01em;
+  font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: -0.015em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #0a0a0a;
@@ -24,14 +24,20 @@ body.theme-light {
   color: #09090b;
 }
 
+/* Display: same family, just tighter + heavier. Mirrors the Instagram / Twitter
+   aesthetic where a single modern sans-serif is used throughout. */
 .font-display {
-  font-family: "Bricolage Grotesque", "Inter Tight", sans-serif;
+  font-family: "Inter Tight", sans-serif;
   letter-spacing: -0.035em;
+  font-weight: 800;
 }
 
+/* "mono-tab" kept as a class name for backward compat but now uses Inter Tight
+   with tabular numerals — feels way more modern than a mono font. */
 .font-mono-tab {
-  font-family: "Geist Mono", "JetBrains Mono", monospace;
+  font-family: "Inter Tight", sans-serif;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" on, "cv11" on, "ss01" on;
   letter-spacing: -0.01em;
 }
 

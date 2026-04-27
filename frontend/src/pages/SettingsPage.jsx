@@ -35,9 +35,9 @@ export default function SettingsPage() {
           <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground font-mono-tab">
             <User size={14} /> Profile
           </div>
-          <input data-testid="settings-name" value={name} onChange={(e)=>setName(e.target.value)} placeholder="Display name" className="w-full bg-transparent border border-border px-3 py-2.5 text-sm" />
-          <textarea data-testid="settings-bio" value={bio} onChange={(e)=>setBio(e.target.value)} placeholder="Bio" rows={2} className="w-full bg-transparent border border-border px-3 py-2.5 text-sm" />
-          <button data-testid="save-profile" onClick={saveProfile} className="bg-foreground text-background px-4 py-2 font-bold text-xs uppercase tracking-widest">Save</button>
+          <input data-testid="settings-name" value={name} onChange={(e)=>setName(e.target.value)} placeholder="Display name" className="w-full bg-secondary px-3 py-2.5 rounded-xl text-sm outline-none" />
+          <textarea data-testid="settings-bio" value={bio} onChange={(e)=>setBio(e.target.value)} placeholder="Bio" rows={2} className="w-full bg-secondary px-3 py-2.5 rounded-xl text-sm outline-none" />
+          <button data-testid="save-profile" onClick={saveProfile} className="bg-foreground text-background px-4 py-2 rounded-full font-semibold text-sm">Save</button>
         </section>
 
         <section className="p-4 space-y-4">
@@ -69,7 +69,7 @@ export default function SettingsPage() {
             <button
               data-testid="toggle-theme"
               onClick={() => toggle({ theme: user.theme === "light" ? "dark" : "light" })}
-              className="px-3 py-1.5 border border-border text-xs uppercase tracking-widest font-bold"
+              className="px-3.5 py-1.5 bg-secondary rounded-full text-xs font-semibold"
             >
               Switch
             </button>

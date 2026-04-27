@@ -3,7 +3,7 @@ import { Heart, MessageCircle, Share2, CheckCircle2, XCircle } from "lucide-reac
 import { api, mediaSrc } from "../lib/api";
 import { Link } from "react-router-dom";
 
-const pillClass = "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[11px] font-mono-tab font-bold uppercase tracking-wider";
+const pillClass = "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold";
 
 export default function FeedPost({ post, viewerId, onChanged }) {
   const [likes, setLikes] = useState(post.likes || 0);
@@ -42,8 +42,8 @@ export default function FeedPost({ post, viewerId, onChanged }) {
           <div className="font-semibold text-sm truncate">@{post.author?.username}</div>
         </Link>
         {post.ticker && (
-          <span className={`px-2 py-1 text-[11px] font-mono-tab font-bold tracking-wider ${post.side === "SHORT" ? "bg-[#FF3B30] text-white" : "bg-[#00C805] text-black"}`}>
-            {post.ticker} · {post.side}
+          <span className={`px-2.5 py-1 text-[11px] font-mono-tab font-semibold rounded-full ${post.side === "SHORT" ? "bg-[#FF3B30] text-white" : "bg-[#00C805] text-black"}`}>
+            ${post.ticker} · {post.side}
           </span>
         )}
         {outcome === "win" && (
@@ -117,14 +117,14 @@ export default function FeedPost({ post, viewerId, onChanged }) {
             <button
               data-testid={`mark-win-${post.post_id}`}
               onClick={() => markOutcome("win")}
-              className="flex-1 py-2 bg-[#00C805] text-black font-bold text-xs uppercase tracking-widest active:scale-95"
+              className="flex-1 py-2 bg-[#00C805] text-black font-semibold text-sm rounded-full active:scale-95"
             >
               Mark Win
             </button>
             <button
               data-testid={`mark-loss-${post.post_id}`}
               onClick={() => markOutcome("loss")}
-              className="flex-1 py-2 bg-[#FF3B30] text-white font-bold text-xs uppercase tracking-widest active:scale-95"
+              className="flex-1 py-2 bg-[#FF3B30] text-white font-semibold text-sm rounded-full active:scale-95"
             >
               Mark Loss
             </button>

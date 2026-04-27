@@ -74,10 +74,10 @@ export default function SearchPage() {
                     key={t.ticker}
                     data-testid={`suggestion-ticker-${t.ticker}`}
                     onClick={() => doSearch(t.ticker)}
-                    className="px-3 py-2 border border-zinc-800 hover:border-white text-sm font-mono-tab font-bold active:scale-95 transition"
+                    className="px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-full text-sm font-semibold active:scale-95 transition"
                   >
                     ${t.ticker}
-                    {t.posts > 0 && <span className="ml-2 text-[10px] text-zinc-500">{t.posts}</span>}
+                    {t.posts > 0 && <span className="ml-2 text-[11px] text-zinc-500 font-mono-tab">{t.posts}</span>}
                   </button>
                 ))}
               </div>

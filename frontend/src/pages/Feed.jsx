@@ -44,18 +44,18 @@ export default function Feed() {
       {/* Header */}
       <header className="fixed top-8 inset-x-0 z-40 bg-black/90 backdrop-blur-xl border-b border-zinc-900">
         <div className="flex items-center justify-between px-4 py-3 max-w-lg mx-auto">
-          <h1 className="font-display font-black text-xl tracking-tighter">TRADEFEEDX</h1>
+          <h1 className="font-display text-2xl tracking-tight">tradefeedx</h1>
           <Link to="/search" data-testid="header-search" className="p-2 rounded-full hover:bg-zinc-900">
             <SearchIcon size={20} />
           </Link>
         </div>
-        <div className="flex gap-5 px-4 max-w-lg mx-auto overflow-x-auto scrollbar-hide">
+        <div className="flex gap-6 px-4 max-w-lg mx-auto overflow-x-auto scrollbar-hide">
           {TABS.map((t) => (
             <button
               key={t.key}
               data-testid={`tab-${t.key}`}
               onClick={() => setTab(t.key)}
-              className={`py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors ${
+              className={`py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors ${
                 tab === t.key ? "border-white text-white" : "border-transparent text-zinc-500"
               }`}
             >
@@ -80,21 +80,21 @@ export default function Feed() {
                 {(user.username || "?")[0].toUpperCase()}
               </div>
             )}
-            <div className="flex-1 text-zinc-500 text-[15px] font-display">What&apos;s your trade idea?</div>
-            <span className="text-xs font-bold uppercase tracking-widest bg-white text-black px-3 py-1.5">Post</span>
+            <div className="flex-1 text-zinc-500 text-[17px]">What&apos;s your trade idea?</div>
+            <span className="text-xs font-semibold bg-white text-black px-3.5 py-1.5 rounded-full">Post</span>
           </Link>
         )}
 
-        {loading && <div className="text-center py-20 text-zinc-600 text-xs uppercase tracking-widest">Loading…</div>}
+        {loading && <div className="text-center py-20 text-zinc-600 text-sm">Loading…</div>}
 
         {!loading && tab === "news" && (
           <div className="divide-y divide-zinc-900">
-            {news.length === 0 && <div className="text-center py-20 text-zinc-600 text-xs uppercase tracking-widest">No news yet</div>}
+            {news.length === 0 && <div className="text-center py-20 text-zinc-600 text-sm">No news yet</div>}
             {news.map((n) => (
               <a key={n.id} href={n.url} target="_blank" rel="noreferrer" className="flex gap-3 p-4 hover:bg-zinc-950" data-testid={`news-${n.id}`}>
-                {n.image && <img src={n.image} alt="" className="w-20 h-20 object-cover flex-shrink-0" />}
+                {n.image && <img src={n.image} alt="" className="w-20 h-20 object-cover flex-shrink-0 rounded-lg" />}
                 <div className="flex-1 min-w-0">
-                  <div className="text-[10px] font-mono-tab text-zinc-500 uppercase tracking-widest mb-1">{n.source}</div>
+                  <div className="text-[11px] text-zinc-500 mb-1">{n.source}</div>
                   <div className="text-sm font-semibold leading-tight">{n.headline}</div>
                 </div>
               </a>
@@ -105,7 +105,7 @@ export default function Feed() {
         {!loading && tab !== "news" && (
           <>
             {posts.length === 0 ? (
-              <div className="text-center py-20 text-zinc-600 text-xs uppercase tracking-widest">
+              <div className="text-center py-20 text-zinc-600 text-sm">
                 {tab === "following" ? "Follow traders to see their posts" : "No posts yet — be the first"}
               </div>
             ) : posts.map((p) => (

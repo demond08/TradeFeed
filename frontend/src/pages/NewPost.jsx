@@ -87,7 +87,7 @@ export default function NewPost() {
           form="new-post-form"
           type="submit"
           disabled={busy || (!ticker.trim() && !caption.trim())}
-          className="bg-white text-black font-bold px-4 py-1.5 text-xs uppercase tracking-widest disabled:opacity-40"
+          className="bg-white text-black font-semibold px-4 py-1.5 text-sm rounded-full disabled:opacity-40"
         >
           {busy ? "…" : "Post"}
         </button>
@@ -120,19 +120,19 @@ export default function NewPost() {
         {/* Action bar (upload media, add trade details) */}
         <div className="flex items-center justify-between border-t border-b border-zinc-900 py-2">
           <div className="flex items-center gap-2">
-            <label data-testid="upload-media" className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white cursor-pointer px-2 py-1.5">
+            <label data-testid="upload-media" className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white cursor-pointer px-2 py-1.5 rounded-full hover:bg-zinc-900 transition-colors">
               <ImageIcon size={18} />
-              <span className="text-xs uppercase tracking-widest">{uploading ? "Uploading…" : "Media"}</span>
+              <span className="text-sm">{uploading ? "Uploading…" : "Media"}</span>
               <input type="file" accept="image/*,video/*" className="hidden" onChange={onFile} />
             </label>
             <button
               type="button"
               data-testid="toggle-trade-fields"
               onClick={() => setShowTradeFields((v) => !v)}
-              className={`flex items-center gap-2 text-sm px-2 py-1.5 ${showTradeFields ? "text-white" : "text-zinc-400 hover:text-white"}`}
+              className={`flex items-center gap-2 text-sm px-2 py-1.5 rounded-full transition-colors ${showTradeFields ? "text-white bg-zinc-900" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}
             >
               <Type size={18} />
-              <span className="text-xs uppercase tracking-widest">Trade</span>
+              <span className="text-sm">Trade</span>
             </button>
           </div>
           <div className={`text-xs font-mono-tab ${charCount > charLimit - 40 ? "text-[#FF3B30]" : "text-zinc-500"}`}>
@@ -148,13 +148,13 @@ export default function NewPost() {
                 value={ticker}
                 onChange={(e) => setTicker(e.target.value.toUpperCase())}
                 placeholder="TICKER (optional)"
-                className="bg-transparent border border-zinc-800 focus:border-white outline-none px-3 py-2.5 text-sm font-mono-tab transition-colors"
+                className="bg-transparent border-0 border-b border-zinc-800 focus:border-white outline-none px-0 py-2 text-sm font-mono-tab transition-colors"
               />
               <select
                 data-testid="post-side"
                 value={side}
                 onChange={(e) => setSide(e.target.value)}
-                className="bg-transparent border border-zinc-800 focus:border-white outline-none px-3 py-2.5 text-sm font-mono-tab"
+                className="bg-transparent border-0 border-b border-zinc-800 focus:border-white outline-none px-0 py-2 text-sm font-mono-tab"
               >
                 <option value="LONG" className="bg-black">LONG</option>
                 <option value="SHORT" className="bg-black">SHORT</option>
@@ -162,9 +162,9 @@ export default function NewPost() {
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              <input data-testid="post-entry" value={entry} onChange={(e)=>setEntry(e.target.value)} placeholder="Entry" className="bg-transparent border border-zinc-800 focus:border-white outline-none px-3 py-2.5 text-sm font-mono-tab" inputMode="decimal" />
-              <input data-testid="post-sl" value={sl} onChange={(e)=>setSl(e.target.value)} placeholder="SL" className="bg-transparent border border-zinc-800 focus:border-white outline-none px-3 py-2.5 text-sm font-mono-tab" inputMode="decimal" />
-              <input data-testid="post-tp" value={tp} onChange={(e)=>setTp(e.target.value)} placeholder="TP" className="bg-transparent border border-zinc-800 focus:border-white outline-none px-3 py-2.5 text-sm font-mono-tab" inputMode="decimal" />
+              <input data-testid="post-entry" value={entry} onChange={(e)=>setEntry(e.target.value)} placeholder="Entry" className="bg-transparent border-0 border-b border-zinc-800 focus:border-white outline-none px-0 py-2 text-sm font-mono-tab" inputMode="decimal" />
+              <input data-testid="post-sl" value={sl} onChange={(e)=>setSl(e.target.value)} placeholder="SL" className="bg-transparent border-0 border-b border-zinc-800 focus:border-white outline-none px-0 py-2 text-sm font-mono-tab" inputMode="decimal" />
+              <input data-testid="post-tp" value={tp} onChange={(e)=>setTp(e.target.value)} placeholder="TP" className="bg-transparent border-0 border-b border-zinc-800 focus:border-white outline-none px-0 py-2 text-sm font-mono-tab" inputMode="decimal" />
             </div>
           </div>
         )}

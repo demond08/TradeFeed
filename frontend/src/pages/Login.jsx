@@ -35,14 +35,14 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white px-6">
       <div className="w-full max-w-sm">
-        <h1 className="font-display font-black text-5xl tracking-tighter mb-2" data-testid="brand-title">TRADEFEEDX</h1>
-        <p className="text-zinc-500 text-sm mb-8 uppercase tracking-[0.25em] font-mono-tab">Social feed for traders</p>
+        <h1 className="font-display text-5xl mb-2" data-testid="brand-title">tradefeedx</h1>
+        <p className="text-zinc-500 text-sm mb-8">Social feed for traders</p>
 
         <form onSubmit={onSubmit} className="space-y-3" data-testid="auth-form">
           {mode === "signup" && (
             <input
               data-testid="username-input"
-              className="w-full bg-transparent border border-zinc-700 px-4 py-3 outline-none focus:border-white text-sm"
+              className="w-full bg-zinc-900 px-4 py-3.5 rounded-xl outline-none focus:bg-zinc-800 text-sm transition-colors"
               placeholder="username"
               value={username}
               onChange={(e) => setUsername(e.target.value.replace(/\s+/g, ""))}
@@ -51,7 +51,7 @@ export default function Login() {
           <input
             data-testid="email-input"
             type="email"
-            className="w-full bg-transparent border border-zinc-700 px-4 py-3 outline-none focus:border-white text-sm"
+            className="w-full bg-zinc-900 px-4 py-3.5 rounded-xl outline-none focus:bg-zinc-800 text-sm transition-colors"
             placeholder="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -60,7 +60,7 @@ export default function Login() {
           <input
             data-testid="password-input"
             type="password"
-            className="w-full bg-transparent border border-zinc-700 px-4 py-3 outline-none focus:border-white text-sm"
+            className="w-full bg-zinc-900 px-4 py-3.5 rounded-xl outline-none focus:bg-zinc-800 text-sm transition-colors"
             placeholder="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -71,9 +71,9 @@ export default function Login() {
             data-testid="submit-auth"
             type="submit"
             disabled={busy}
-            className="w-full bg-white text-black font-bold py-3 uppercase tracking-widest text-sm active:scale-95 disabled:opacity-60"
+            className="w-full bg-white text-black font-bold py-3.5 rounded-xl text-sm active:scale-[0.98] disabled:opacity-60 transition-transform"
           >
-            {busy ? "…" : mode === "login" ? "Log In" : "Create Account"}
+            {busy ? "…" : mode === "login" ? "Log in" : "Create account"}
           </button>
         </form>
 
@@ -84,7 +84,7 @@ export default function Login() {
         <button
           data-testid="google-login"
           onClick={googleLogin}
-          className="w-full border border-zinc-700 hover:border-white text-white font-semibold py-3 uppercase tracking-widest text-sm"
+          className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-semibold py-3.5 rounded-xl text-sm transition-colors"
         >
           Continue with Google
         </button>
@@ -92,7 +92,7 @@ export default function Login() {
         <button
           data-testid="toggle-auth-mode"
           onClick={() => setMode(mode === "login" ? "signup" : "login")}
-          className="mt-6 w-full text-zinc-400 text-xs uppercase tracking-widest"
+          className="mt-6 w-full text-zinc-400 text-sm"
         >
           {mode === "login" ? "Need an account? Sign up" : "Have an account? Log in"}
         </button>

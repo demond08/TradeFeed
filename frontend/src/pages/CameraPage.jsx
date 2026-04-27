@@ -159,10 +159,10 @@ export default function CameraPage() {
             </div>
 
             <div className="flex flex-wrap gap-2 font-mono-tab text-[11px] uppercase tracking-widest">
-              {analysis.side && <span className="px-2 py-1 border border-zinc-700">{analysis.side}</span>}
-              {analysis.timeframe && <span className="px-2 py-1 border border-zinc-700">{analysis.timeframe}</span>}
-              {analysis.trend && <span className="px-2 py-1 border border-zinc-700">{analysis.trend}</span>}
-              {analysis.pattern && <span className="px-2 py-1 border border-zinc-700">{analysis.pattern}</span>}
+              {analysis.side && <span className="px-2.5 py-1 bg-zinc-800 rounded-full">{analysis.side}</span>}
+              {analysis.timeframe && <span className="px-2.5 py-1 bg-zinc-800 rounded-full">{analysis.timeframe}</span>}
+              {analysis.trend && <span className="px-2.5 py-1 bg-zinc-800 rounded-full">{analysis.trend}</span>}
+              {analysis.pattern && <span className="px-2.5 py-1 bg-zinc-800 rounded-full">{analysis.pattern}</span>}
             </div>
 
             <div className="grid grid-cols-3 gap-2 font-mono-tab text-xs">

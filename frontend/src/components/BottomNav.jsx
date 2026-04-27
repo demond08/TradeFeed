@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Home, Search, Camera, Bell, User } from "lucide-react";
 
-const linkBase = "flex flex-col items-center justify-center flex-1 h-full gap-1 text-[10px] uppercase tracking-wider font-semibold";
+const linkBase = "flex flex-col items-center justify-center flex-1 h-full gap-1 text-[10px] font-semibold";
 
 export default function BottomNav({ username }) {
   const nav = useNavigate();
@@ -13,7 +13,7 @@ export default function BottomNav({ username }) {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <NavLink data-testid="nav-home" to="/" end className={({isActive}) => `${linkBase} ${isActive ? "text-white" : "text-zinc-500"}`}>
-        <Home size={22} /> Feed
+        <Home size={22} /> Home
       </NavLink>
       <NavLink data-testid="nav-search" to="/search" className={({isActive}) => `${linkBase} ${isActive ? "text-white" : "text-zinc-500"}`}>
         <Search size={22} /> Search
@@ -36,7 +36,7 @@ export default function BottomNav({ username }) {
         to={username ? `/u/${username}` : "/login"}
         className={({isActive}) => `${linkBase} ${isActive ? "text-white" : "text-zinc-500"}`}
       >
-        <User size={22} /> Me
+        <User size={22} /> Profile
       </NavLink>
     </nav>
   );
