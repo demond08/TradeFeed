@@ -1,0 +1,102 @@
+{
+  "theme": "dark",
+  "archetype": "Swiss & High-Contrast",
+  "design_philosophy": "A brutalist, high-performance 'command center' mixed with the viral, endless scroll of TikTok. Built for day traders who need raw data, fast decisions, and high-adrenaline social proof. Avoid 'soft' SaaS vibes.",
+  "colors": {
+    "dark": {
+      "background": "#0A0A0A",
+      "surface": "#121212",
+      "surface_elevated": "#1E1E1E",
+      "border": "#27272A",
+      "text_primary": "#FFFFFF",
+      "text_secondary": "#A1A1AA",
+      "accent_win": "#00C805",
+      "accent_loss": "#FF3B30",
+      "accent_brand": "#FFFFFF"
+    },
+    "light": {
+      "background": "#FFFFFF",
+      "surface": "#F4F4F5",
+      "surface_elevated": "#E4E4E7",
+      "border": "#D4D4D8",
+      "text_primary": "#09090B",
+      "text_secondary": "#52525B",
+      "accent_win": "#16A34A",
+      "accent_loss": "#DC2626",
+      "accent_brand": "#000000"
+    }
+  },
+  "typography": {
+    "heading_font": "Chivo",
+    "body_font": "IBM Plex Sans",
+    "mono_font": "JetBrains Mono",
+    "rules": {
+      "headings": "tracking-tight, use font-black for extreme emphasis",
+      "data": "tabular-nums for all numbers, prices, tickers, and percentages",
+      "h1": "text-4xl sm:text-5xl font-black tracking-tighter",
+      "h2": "text-2xl sm:text-3xl font-bold tracking-tight",
+      "h3": "text-xl sm:text-2xl font-semibold",
+      "body": "text-base leading-relaxed",
+      "labels": "text-xs font-bold uppercase tracking-[0.2em]"
+    }
+  },
+  "layout": {
+    "spacing_scale": "Highly dense for data components (p-2 to p-4) and generous for section dividers (py-12).",
+    "mobile_first": true,
+    "feed_container": "w-full max-w-lg mx-auto min-h-screen pb-24 pt-20",
+    "bottom_nav": "fixed bottom-0 w-full h-16 bg-black/80 backdrop-blur-xl border-t border-white/10 z-50 flex justify-around items-center px-4 pb-[env(safe-area-inset-bottom)]",
+    "top_ticker": "fixed top-0 w-full h-8 bg-zinc-900 border-b border-white/10 z-50 overflow-hidden flex items-center text-xs font-mono text-white tracking-widest uppercase"
+  },
+  "components": {
+    "feed_post": {
+      "style": "cardless, full-width on mobile, separated by 1px solid border-border (border-b-8 border-black/50 for strong separation)",
+      "header": "flex items-center gap-3 p-4",
+      "media": "aspect-[4/5] sm:aspect-square bg-zinc-900 w-full relative object-cover",
+      "ai_verdict_bar": "flex justify-between items-center px-4 py-3 bg-zinc-900/50 border-y border-white/5 text-sm font-mono backdrop-blur-md absolute bottom-0 w-full",
+      "footer": "p-4 space-y-2"
+    },
+    "badges": {
+      "win": "bg-[#00C805] text-black px-2 py-1 rounded-sm font-bold text-xs tracking-wider",
+      "loss": "bg-[#FF3B30] text-white px-2 py-1 rounded-sm font-bold text-xs tracking-wider"
+    },
+    "buttons": {
+      "primary": "bg-white text-black hover:bg-zinc-200 rounded-none px-6 py-2 font-bold transition-colors",
+      "secondary": "bg-zinc-800 text-white hover:bg-zinc-700 rounded-none px-6 py-2 font-bold transition-colors",
+      "camera_fab": "w-14 h-14 bg-white rounded-full flex items-center justify-center -translate-y-6 shadow-[0_0_20px_rgba(255,255,255,0.2)] text-black hover:scale-105 transition-transform"
+    },
+    "inputs": {
+      "style": "bg-transparent border border-white/20 rounded-none focus:border-white focus:ring-0 placeholder:text-zinc-500 transition-colors"
+    },
+    "tabs": {
+      "style": "flex space-x-6 border-b border-white/10 px-4 overflow-x-auto scrollbar-hide",
+      "active": "border-b-2 border-white text-white py-3 font-semibold",
+      "inactive": "text-zinc-500 py-3 font-medium"
+    }
+  },
+  "media": {
+    "icons_library": "lucide-react",
+    "images": {
+      "avatars": [
+        "https://images.pexels.com/photos/6918658/pexels-photo-6918658.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=150&w=150",
+        "https://images.unsplash.com/photo-1614249702395-ee90832eb400?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNzl8MHwxfHNlYXJjaHwxfHx0cmFkZXIlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NzcyNzE5Nzd8MA&ixlib=rb-4.1.0&q=85&w=150",
+        "https://images.unsplash.com/photo-1544096259-b9cb279f67c6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNzl8MHwxfHNlYXJjaHw0fHx0cmFkZXIlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NzcyNzE5Nzd8MA&ixlib=rb-4.1.0&q=85&w=150"
+      ],
+      "charts": [
+        "https://images.pexels.com/photos/5784807/pexels-photo-5784807.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "https://images.pexels.com/photos/30268012/pexels-photo-30268012.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      ],
+      "logo": "Text-based logo: 'TRADEFEEDX' in font-black tracking-tighter. No placeholder image required."
+    }
+  },
+  "motion": {
+    "hover": "transition-transform duration-200 ease-out",
+    "click": "active:scale-95 transition-transform",
+    "page_transition": "animate-in fade-in slide-in-from-bottom-4 duration-300"
+  },
+  "technical_instructions": {
+    "dependencies": "lucide-react, react-fast-marquee, @radix-ui/react-slot",
+    "styling": "Use pure HTML/Tailwind for the main scrolling feed to ensure maximum performance (Shadcn cards add unnecessary DOM nesting). Use Shadcn ONLY for interactive state components like Settings Dialogs, Tabs, Forms.",
+    "accessibility": "CRITICAL: All interactive elements MUST include data-testid.",
+    "mobile_requirements": "Mobile-first approach is mandatory. Bottom nav must always remain fixed and visible. Use pb-[env(safe-area-inset-bottom)] to clear iOS home indicator."
+  }
+}
