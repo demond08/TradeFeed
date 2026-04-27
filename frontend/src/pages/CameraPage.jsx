@@ -149,7 +149,7 @@ export default function CameraPage() {
 
         {/* AI analysis overlay */}
         {analysis && (
-          <div data-testid="ai-analysis" className="absolute inset-x-4 top-36 p-4 bg-black/80 backdrop-blur border border-white/20 space-y-2 text-sm">
+          <div data-testid="ai-analysis" className="absolute inset-x-4 top-36 bottom-44 overflow-y-auto p-4 bg-black/85 backdrop-blur border border-white/20 space-y-3 text-sm">
             <div className="flex items-center gap-2">
               <Sparkles size={16} />
               <span className="font-display font-black uppercase tracking-widest">AI Verdict</span>
@@ -157,12 +157,71 @@ export default function CameraPage() {
                 {analysis.verdict} · {analysis.confidence}%
               </span>
             </div>
+
+            <div className="flex flex-wrap gap-2 font-mono-tab text-[11px] uppercase tracking-widest">
+              {analysis.side && <span className="px-2 py-1 border border-zinc-700">{analysis.side}</span>}
+              {analysis.timeframe && <span className="px-2 py-1 border border-zinc-700">{analysis.timeframe}</span>}
+              {analysis.trend && <span className="px-2 py-1 border border-zinc-700">{analysis.trend}</span>}
+              {analysis.pattern && <span className="px-2 py-1 border border-zinc-700">{analysis.pattern}</span>}
+            </div>
+
             <div className="grid grid-cols-3 gap-2 font-mono-tab text-xs">
               <div><div className="text-zinc-500 uppercase text-[10px]">Entry</div><div className="font-bold">{analysis.entry ?? "—"}</div></div>
               <div><div className="text-zinc-500 uppercase text-[10px]">SL</div><div className="font-bold text-[#FF3B30]">{analysis.stop_loss ?? "—"}</div></div>
               <div><div className="text-zinc-500 uppercase text-[10px]">TP</div><div className="font-bold text-[#00C805]">{analysis.take_profit ?? "—"}</div></div>
             </div>
-            <p className="text-xs text-zinc-300 leading-snug">{analysis.rationale}</p>
+
+            {(analysis.risk_reward || (analysis.targets && analysis.targets.length > 0)) && (
+              <div className="grid grid-cols-2 gap-2 font-mono-tab text-xs">
+                <div><div className="text-zinc-500 uppercase text-[10px]">R:R</div><div className="font-bold">{analysis.risk_reward ?? "—"}</div></div>
+                <div><div className="text-zinc-500 uppercase text-[10px]">Targets</div><div className="font-bold">{(analysis.targets || []).join(", ") || "—"}</div></div>
+              </div>
+            )}
+
+            {analysis.key_levels && (analysis.key_levels.support?.length || analysis.key_levels.resistance?.length) ? (
+              <div className="grid grid-cols-2 gap-2 font-mono-tab text-xs">
+                <div>
+                  <div className="text-zinc-500 uppercase text-[10px]">Support</div>
+                  <div className="font-bold text-[#00C805]">{(analysis.key_levels.support || []).join(" · ") || "—"}</div>
+                </div>
+                <div>
+                  <div className="text-zinc-500 uppercase text-[10px]">Resistance</div>
+                  <div className="font-bold text-[#FF3B30]">{(analysis.key_levels.resistance || []).join(" · ") || "—"}</div>
+                </div>
+              </div>
+            ) : null}
+
+            {analysis.indicators && (
+              <div className="text-xs">
+                <div className="text-zinc-500 uppercase text-[10px] tracking-widest">Indicators</div>
+                <div className="text-zinc-200">{analysis.indicators}</div>
+              </div>
+            )}
+
+            {analysis.entry_reasoning && (
+              <div className="text-xs">
+                <div className="text-zinc-500 uppercase text-[10px] tracking-widest">Why</div>
+                <p className="text-zinc-200 leading-snug">{analysis.entry_reasoning}</p>
+              </div>
+            )}
+
+            {analysis.risks && (
+              <div className="text-xs">
+                <div className="text-[#FF3B30] uppercase text-[10px] tracking-widest">Risks</div>
+                <p className="text-zinc-200 leading-snug">{analysis.risks}</p>
+              </div>
+            )}
+
+            {analysis.alt_scenario && (
+              <div className="text-xs">
+                <div className="text-zinc-500 uppercase text-[10px] tracking-widest">Alt scenario</div>
+                <p className="text-zinc-200 leading-snug">{analysis.alt_scenario}</p>
+              </div>
+            )}
+
+            {analysis.rationale && (
+              <p className="text-xs text-zinc-400 leading-snug border-t border-zinc-800 pt-2">{analysis.rationale}</p>
+            )}
           </div>
         )}
 

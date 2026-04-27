@@ -29,23 +29,21 @@ export default function FeedPost({ post, viewerId, onChanged }) {
 
   return (
     <article data-testid={`post-${post.post_id}`} className="border-b-4 border-zinc-950 bg-black">
-      {/* Header */}
-      <header className="flex items-center gap-3 p-4">
-        <Link to={`/u/${post.author?.username}`} className="flex items-center gap-3 flex-1">
+      {/* Header — minimal: avatar + username + ticker pill */}
+      <header className="flex items-center gap-3 px-4 pt-4 pb-3">
+        <Link to={`/u/${post.author?.username}`} className="flex items-center gap-3 flex-1 min-w-0">
           {post.author?.avatar_url ? (
-            <img src={mediaSrc(post.author.avatar_url)} alt="" className="w-9 h-9 rounded-full object-cover" />
+            <img src={mediaSrc(post.author.avatar_url)} alt="" className="w-8 h-8 rounded-full object-cover" />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center font-display font-black text-sm">
+            <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center font-display font-black text-xs">
               {(post.author?.username || "?")[0].toUpperCase()}
             </div>
           )}
-          <div className="flex-1 min-w-0">
-            <div className="font-display font-bold text-sm leading-tight">@{post.author?.username}</div>
-            <div className="text-[11px] text-zinc-500 font-mono-tab uppercase tracking-wider">
-              {post.ticker} • {post.side}
-            </div>
-          </div>
+          <div className="font-semibold text-sm truncate">@{post.author?.username}</div>
         </Link>
+        <span className={`px-2 py-1 text-[11px] font-mono-tab font-bold tracking-wider ${post.side === "SHORT" ? "bg-[#FF3B30] text-white" : "bg-[#00C805] text-black"}`}>
+          {post.ticker} · {post.side}
+        </span>
         {outcome === "win" && (
           <span className={`${pillClass} bg-[#00C805] text-black`} data-testid="outcome-win-badge">
             <CheckCircle2 size={12} /> Win

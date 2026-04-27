@@ -246,12 +246,23 @@ def user_public(u: dict) -> dict:
     }
 
 
-async def decorate_post(p: dict, viewer: Optional[dict]) -> dict:
-    author = await db.users.find_one({"user_id": p["author_id"]}, {"_id": 0})
-    liked = False
-    if viewer:
-        lk = await db.likes.find_one({"user_id": viewer["user_id"], "post_id": p["post_id"]})
-        liked = bool(lk)
+async def decorate_post(
+    p: dict,
+    viewer: Optional[dict],
+    author_map: Optional[dict] = None,
+    liked_set: Optional[set] = None,
+) -> dict:
+    if author_map is not None:
+        author = author_map.get(p["author_id"])
+    else:
+        author = await db.users.find_one({"user_id": p["author_id"]}, {"_id": 0})
+    if liked_set is not None:
+        liked = p["post_id"] in liked_set
+    else:
+        liked = False
+        if viewer:
+            lk = await db.likes.find_one({"user_id": viewer["user_id"], "post_id": p["post_id"]})
+            liked = bool(lk)
     return {
         "post_id": p["post_id"],
         "author": user_public(author) if author else {},
@@ -268,6 +279,25 @@ async def decorate_post(p: dict, viewer: Optional[dict]) -> dict:
         "liked_by_me": liked,
         "created_at": p.get("created_at"),
     }
+
+
+async def batch_decorate(posts: list, viewer: Optional[dict]) -> list:
+    if not posts:
+        return []
+    author_ids = list({p["author_id"] for p in posts})
+    authors = await db.users.find({"user_id": {"$in": author_ids}}, {"_id": 0}).to_list(len(author_ids))
+    author_map = {a["user_id"]: a for a in authors}
+    liked_set: set = set()
+    if viewer:
+        post_ids = [p["post_id"] for p in posts]
+        likes = await db.likes.find(
+            {"user_id": viewer["user_id"], "post_id": {"$in": post_ids}}
+        ).to_list(len(post_ids))
+        liked_set = {lk["post_id"] for lk in likes}
+    out = []
+    for p in posts:
+        out.append(await decorate_post(p, viewer, author_map=author_map, liked_set=liked_set))
+    return out
 
 
 # ------------------------------------------------------------------
@@ -467,10 +497,7 @@ async def feed(
     posts = await cursor.to_list(100)
     if tab == "trending":
         posts.sort(key=lambda p: (p.get("likes", 0), p.get("created_at", "")), reverse=True)
-    out = []
-    for p in posts:
-        out.append(await decorate_post(p, viewer))
-    return out
+    return await batch_decorate(posts, viewer)
 
 
 @api.post("/posts/{post_id}/like")
@@ -544,10 +571,35 @@ async def search(q: str = Query("")):
         {"_id": 0},
     ).limit(20).to_list(20)
     posts = await db.posts.find({"ticker": {"$regex": q.upper(), "$options": "i"}}, {"_id": 0}).limit(20).to_list(20)
-    decorated = []
-    for p in posts:
-        decorated.append(await decorate_post(p, None))
+    decorated = await batch_decorate(posts, None)
     return {"users": [user_public(u) for u in users], "posts": decorated}
+
+
+@api.get("/search/suggestions")
+async def search_suggestions(request: Request):
+    """Return trending tickers + top traders for empty search state."""
+    # Aggregate top tickers
+    pipeline = [
+        {"$group": {"_id": "$ticker", "count": {"$sum": 1}, "likes": {"$sum": "$likes"}}},
+        {"$sort": {"likes": -1, "count": -1}},
+        {"$limit": 8},
+    ]
+    tick_rows = await db.posts.aggregate(pipeline).to_list(8)
+    tickers = [{"ticker": r["_id"], "posts": r["count"]} for r in tick_rows if r["_id"]]
+    if len(tickers) < 4:
+        defaults = ["AAPL", "TSLA", "NVDA", "SPY", "BTC", "ETH", "AMD", "MSFT"]
+        existing = {t["ticker"] for t in tickers}
+        for d in defaults:
+            if d not in existing:
+                tickers.append({"ticker": d, "posts": 0})
+            if len(tickers) >= 8:
+                break
+    # Top traders by followers
+    top_traders = await db.users.find({}, {"_id": 0}).sort("followers_count", -1).limit(6).to_list(6)
+    return {
+        "tickers": tickers[:8],
+        "traders": [user_public(u) for u in top_traders],
+    }
 
 
 @api.get("/users/{username}")
@@ -675,10 +727,27 @@ async def analyze_trade(data: AnalyzeReq, user: dict = Depends(current_user)):
         b64 = b64.split(",", 1)[1]
 
     system = (
-        "You are an expert day-trading analyst. Given a chart screenshot, respond with a terse JSON object "
-        "containing: verdict (GOOD | RISKY | BAD), confidence (0-100 int), side (LONG|SHORT), "
-        "entry (number or null), stop_loss (number or null), take_profit (number or null), "
-        "rationale (<= 40 words). Only output valid JSON. No markdown, no extra text."
+        "You are a senior institutional technical analyst and risk manager. You analyze a trading chart screenshot "
+        "and produce a rigorous, multi-factor trade plan. Respond with STRICT JSON ONLY (no markdown, no prose outside JSON). "
+        "Required keys:\n"
+        "  verdict: 'GOOD' | 'RISKY' | 'BAD'\n"
+        "  confidence: int 0-100\n"
+        "  side: 'LONG' | 'SHORT'\n"
+        "  timeframe: short string (e.g. '5m','15m','1h','4h','1D') inferred from the chart\n"
+        "  trend: 'UPTREND' | 'DOWNTREND' | 'RANGE' | 'CHOPPY'\n"
+        "  pattern: short string of the dominant pattern (e.g. 'bull flag','double top','range break','head & shoulders')\n"
+        "  key_levels: { support: [numbers], resistance: [numbers] }  (1-3 values each, estimated from chart)\n"
+        "  entry: number or null (suggested entry price)\n"
+        "  stop_loss: number or null\n"
+        "  take_profit: number or null\n"
+        "  targets: [numbers] (optional additional TP levels, 0-3)\n"
+        "  risk_reward: number (TP-entry)/(entry-SL) rounded to 2 decimals, or null if unknown\n"
+        "  indicators: short string of any indicators visible (e.g. 'EMA20/50, RSI bullish div, volume spike')\n"
+        "  entry_reasoning: <= 35 words why this setup works\n"
+        "  risks: <= 35 words listing top 2 risk factors / invalidation\n"
+        "  alt_scenario: <= 25 words describing what happens if the setup fails\n"
+        "  rationale: <= 40 words concise overall summary\n"
+        "If a field cannot be reasonably inferred, use null (or empty list). Use the same numeric scale as visible on the chart."
     )
     chat = LlmChat(
         api_key=EMERGENT_LLM_KEY,
@@ -686,7 +755,13 @@ async def analyze_trade(data: AnalyzeReq, user: dict = Depends(current_user)):
         system_message=system,
     ).with_model("gemini", "gemini-3.1-pro-preview")
 
-    user_text = f"Ticker: {data.ticker or 'UNKNOWN'}. Notes: {data.notes or 'none'}. Analyze the chart."
+    user_text = (
+        f"Ticker: {data.ticker or 'UNKNOWN'}. "
+        f"User notes: {data.notes or 'none'}. "
+        "Analyze the chart in depth: identify timeframe, trend, dominant pattern, key support/resistance, "
+        "indicators present, and produce a complete trade plan (entry, SL, TP, optional targets, R:R, "
+        "reasoning, risks, and alternative scenario). Return the strict JSON schema specified."
+    )
     msg = UserMessage(text=user_text, file_contents=[ImageContent(image_base64=b64)])
     try:
         resp = await chat.send_message(msg)
@@ -701,8 +776,16 @@ async def analyze_trade(data: AnalyzeReq, user: dict = Depends(current_user)):
     try:
         parsed = json.loads(text)
     except Exception:
-        parsed = {"verdict": "RISKY", "confidence": 50, "rationale": text[:200], "side": "LONG",
-                  "entry": None, "stop_loss": None, "take_profit": None}
+        logger.warning(f"AI analyze non-JSON reply: {text[:500]}")
+        parsed = {
+            "verdict": "RISKY", "confidence": 50, "side": "LONG",
+            "timeframe": None, "trend": None, "pattern": None,
+            "key_levels": {"support": [], "resistance": []},
+            "entry": None, "stop_loss": None, "take_profit": None,
+            "targets": [], "risk_reward": None, "indicators": None,
+            "entry_reasoning": text[:200], "risks": "", "alt_scenario": "",
+            "rationale": text[:200],
+        }
     return parsed
 
 

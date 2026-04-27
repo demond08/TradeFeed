@@ -62,18 +62,18 @@ export default function ProfilePage() {
           {u.bio && <p className="text-sm text-zinc-400 mt-1">{u.bio}</p>}
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-3 font-mono-tab">
-          <div className="border border-zinc-800 p-3">
+        <div className="mt-4 grid grid-cols-3 gap-6 font-mono-tab">
+          <div>
             <div className="text-[10px] uppercase text-zinc-500 tracking-widest">Win Rate</div>
-            <div className="font-black text-xl">{data.win_rate}%</div>
+            <div className="font-black text-2xl mt-1">{data.win_rate}%</div>
           </div>
-          <div className="border border-zinc-800 p-3">
+          <div>
             <div className="text-[10px] uppercase text-zinc-500 tracking-widest">Wins</div>
-            <div className="font-black text-xl text-[#00C805]">{u.wins}</div>
+            <div className="font-black text-2xl text-[#00C805] mt-1">{u.wins}</div>
           </div>
-          <div className="border border-zinc-800 p-3">
+          <div>
             <div className="text-[10px] uppercase text-zinc-500 tracking-widest">Losses</div>
-            <div className="font-black text-xl text-[#FF3B30]">{u.losses}</div>
+            <div className="font-black text-2xl text-[#FF3B30] mt-1">{u.losses}</div>
           </div>
         </div>
 
