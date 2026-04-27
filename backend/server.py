@@ -609,7 +609,7 @@ async def get_profile(username: str, request: Request):
     if not u:
         raise HTTPException(status_code=404, detail="User not found")
     posts = await db.posts.find({"author_id": u["user_id"]}, {"_id": 0}).sort("created_at", -1).limit(100).to_list(100)
-    decorated = [await decorate_post(p, viewer) for p in posts]
+    decorated = await batch_decorate(posts, viewer)
     total = u.get("wins", 0) + u.get("losses", 0)
     win_rate = round((u.get("wins", 0) / total) * 100, 1) if total > 0 else 0.0
     is_following = False
