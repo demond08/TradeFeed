@@ -140,6 +140,7 @@ class SettingsUpdate(BaseModel):
     theme: Optional[str] = None
     bio: Optional[str] = None
     name: Optional[str] = None
+    trading_style: Optional[str] = None  # Scalper | Day | Swing | Options | Crypto
 
 
 class AnalyzeReq(BaseModel):
@@ -238,6 +239,7 @@ def user_public(u: dict) -> dict:
         "avatar_url": u.get("avatar_url", ""),
         "is_private": u.get("is_private", False),
         "theme": u.get("theme", "dark"),
+        "trading_style": u.get("trading_style", ""),
         "followers_count": u.get("followers_count", 0),
         "following_count": u.get("following_count", 0),
         "wins": u.get("wins", 0),
@@ -611,10 +613,62 @@ async def get_profile(username: str, request: Request):
     u = await db.users.find_one({"username": username.lower()}, {"_id": 0})
     if not u:
         raise HTTPException(status_code=404, detail="User not found")
-    posts = await db.posts.find({"author_id": u["user_id"]}, {"_id": 0}).sort("created_at", -1).limit(100).to_list(100)
+    posts = await db.posts.find({"author_id": u["user_id"]}, {"_id": 0}).sort("created_at", -1).limit(200).to_list(200)
     decorated = await batch_decorate(posts, viewer)
-    total = u.get("wins", 0) + u.get("losses", 0)
-    win_rate = round((u.get("wins", 0) / total) * 100, 1) if total > 0 else 0.0
+    wins = u.get("wins", 0)
+    losses = u.get("losses", 0)
+    total = wins + losses
+    win_rate = round((wins / total) * 100, 1) if total > 0 else 0.0
+
+    # Compute richer stats from post history
+    rr_values = []
+    best_trade = 0.0
+    total_pnl_r = 0.0
+    equity_curve = []  # cumulative R-multiples, oldest first
+    running = 0.0
+    ordered = list(reversed(posts))  # oldest first
+    for p in ordered:
+        entry = p.get("entry")
+        sl = p.get("stop_loss")
+        tp = p.get("take_profit")
+        # R:R per post
+        if entry and sl and tp and entry != sl:
+            try:
+                rr = abs((tp - entry) / (entry - sl))
+                rr_values.append(rr)
+            except Exception:
+                rr = None
+        else:
+            rr = None
+        outcome = p.get("outcome", "pending")
+        delta = 0.0
+        if outcome == "win":
+            delta = rr if rr else 1.0
+        elif outcome == "loss":
+            delta = -1.0
+        running += delta
+        total_pnl_r += delta
+        if delta > best_trade:
+            best_trade = delta
+        equity_curve.append({"t": p.get("created_at"), "pnl_r": round(running, 2)})
+
+    avg_rr = round(sum(rr_values) / len(rr_values), 2) if rr_values else None
+
+    # Badges
+    badges = []
+    if total >= 1:
+        badges.append({"key": "first_trade", "label": "First trade"})
+    if wins >= 5:
+        badges.append({"key": "hot_hand", "label": "Hot hand"})
+    if win_rate >= 70 and total >= 10:
+        badges.append({"key": "sharp_shooter", "label": "Sharp shooter"})
+    if (u.get("followers_count") or 0) >= 10:
+        badges.append({"key": "rising", "label": "Rising star"})
+    if u.get("avatar_url"):
+        badges.append({"key": "complete", "label": "Profile complete"})
+    if total_pnl_r >= 5:
+        badges.append({"key": "compounder", "label": "Compounder"})
+
     is_following = False
     if viewer:
         is_following = bool(
@@ -625,8 +679,118 @@ async def get_profile(username: str, request: Request):
         "posts": decorated,
         "win_rate": win_rate,
         "trade_count": total,
+        "stats": {
+            "avg_rr": avg_rr,
+            "total_pnl_r": round(total_pnl_r, 2),
+            "best_trade_r": round(best_trade, 2),
+            "equity_curve": equity_curve[-60:],  # last 60 points
+        },
+        "badges": badges,
         "is_following": is_following,
         "is_me": bool(viewer and viewer["user_id"] == u["user_id"]),
+    }
+
+
+# ------------------------------------------------------------------
+# Live market quotes (Finnhub) + Leaderboard
+# ------------------------------------------------------------------
+_QUOTE_CACHE: dict = {}
+_QUOTE_TTL = 20  # seconds
+
+
+@api.get("/market/quote/{symbol}")
+async def market_quote(symbol: str):
+    if not FINNHUB_API_KEY:
+        raise HTTPException(status_code=503, detail="Quotes unavailable")
+    sym = (symbol or "").upper().strip()
+    if not sym:
+        raise HTTPException(status_code=400, detail="symbol required")
+    now = datetime.now(timezone.utc).timestamp()
+    cached = _QUOTE_CACHE.get(sym)
+    if cached and (now - cached["ts"] < _QUOTE_TTL):
+        return cached["data"]
+    try:
+        r = requests.get(
+            "https://finnhub.io/api/v1/quote",
+            params={"symbol": sym, "token": FINNHUB_API_KEY},
+            timeout=8,
+        )
+        r.raise_for_status()
+        q = r.json() or {}
+    except Exception as e:
+        logger.error(f"quote error {sym}: {e}")
+        raise HTTPException(status_code=502, detail="Quote fetch failed")
+    out = {
+        "symbol": sym,
+        "price": q.get("c"),
+        "prev_close": q.get("pc"),
+        "high": q.get("h"),
+        "low": q.get("l"),
+        "open": q.get("o"),
+        "change_pct": (
+            round(((q.get("c") or 0) - (q.get("pc") or 0)) / q.get("pc") * 100, 2)
+            if q.get("pc") else None
+        ),
+        "ts": q.get("t"),
+    }
+    _QUOTE_CACHE[sym] = {"ts": now, "data": out}
+    return out
+
+
+@api.get("/leaderboard")
+async def leaderboard(period: str = "weekly"):
+    """Top traders by win rate and by total wins within the period."""
+    days = 30 if period == "monthly" else 7
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+
+    pipeline = [
+        {"$match": {"created_at": {"$gte": since}, "outcome": {"$in": ["win", "loss"]}}},
+        {"$group": {
+            "_id": "$author_id",
+            "wins": {"$sum": {"$cond": [{"$eq": ["$outcome", "win"]}, 1, 0]}},
+            "losses": {"$sum": {"$cond": [{"$eq": ["$outcome", "loss"]}, 1, 0]}},
+            "trades": {"$sum": 1},
+        }},
+        {"$addFields": {
+            "win_rate": {
+                "$cond": [
+                    {"$gt": ["$trades", 0]},
+                    {"$multiply": [{"$divide": ["$wins", "$trades"]}, 100]},
+                    0,
+                ]
+            }
+        }},
+    ]
+    rows = await db.posts.aggregate(pipeline).to_list(500)
+
+    # Join with users
+    user_ids = [r["_id"] for r in rows]
+    users = await db.users.find({"user_id": {"$in": user_ids}}, {"_id": 0}).to_list(len(user_ids) or 1)
+    umap = {u["user_id"]: u for u in users}
+
+    enriched = []
+    for r in rows:
+        u = umap.get(r["_id"])
+        if not u:
+            continue
+        enriched.append({
+            "user": user_public(u),
+            "wins": r["wins"],
+            "losses": r["losses"],
+            "trades": r["trades"],
+            "win_rate": round(r["win_rate"], 1),
+        })
+
+    by_rate = sorted(
+        [e for e in enriched if e["trades"] >= 2],
+        key=lambda x: (x["win_rate"], x["wins"]),
+        reverse=True,
+    )[:20]
+    by_wins = sorted(enriched, key=lambda x: (x["wins"], x["win_rate"]), reverse=True)[:20]
+    return {
+        "period": period,
+        "top_by_win_rate": by_rate,
+        "top_by_wins": by_wins,
     }
 
 
