@@ -105,14 +105,14 @@ class User(BaseModel):
 
 
 class PostCreate(BaseModel):
-    ticker: str
+    ticker: Optional[str] = ""
     side: str = "LONG"  # LONG | SHORT
     entry: Optional[float] = None
     stop_loss: Optional[float] = None
     take_profit: Optional[float] = None
     caption: Optional[str] = ""
     media_url: Optional[str] = ""
-    media_type: Optional[str] = "image"  # image | video
+    media_type: Optional[str] = "image"  # image | video | text
 
 
 class Post(BaseModel):
@@ -460,18 +460,21 @@ async def media(path: str):
 # ------------------------------------------------------------------
 @api.post("/posts")
 async def create_post(data: PostCreate, user: dict = Depends(current_user)):
+    ticker = (data.ticker or "").upper().strip()
+    if not ticker and not (data.caption or "").strip():
+        raise HTTPException(status_code=400, detail="Provide a ticker or caption")
     post_id = f"post_{uuid.uuid4().hex[:12]}"
     doc = {
         "post_id": post_id,
         "author_id": user["user_id"],
-        "ticker": data.ticker.upper(),
-        "side": data.side.upper(),
+        "ticker": ticker,
+        "side": (data.side or "LONG").upper(),
         "entry": data.entry,
         "stop_loss": data.stop_loss,
         "take_profit": data.take_profit,
         "caption": data.caption or "",
         "media_url": data.media_url or "",
-        "media_type": data.media_type or "image",
+        "media_type": "text" if not data.media_url else (data.media_type or "image"),
         "outcome": "pending",
         "likes": 0,
         "created_at": datetime.now(timezone.utc).isoformat(),

@@ -66,6 +66,25 @@ export default function Feed() {
       </header>
 
       <main className="max-w-lg mx-auto pt-[7.5rem] pb-24">
+        {/* Twitter-style compose bar */}
+        {tab !== "news" && user && (
+          <Link
+            to="/new"
+            data-testid="compose-bar"
+            className="flex items-center gap-3 px-4 py-3 border-b border-zinc-900 hover:bg-zinc-950 active:bg-zinc-900 transition-colors"
+          >
+            {user.avatar_url ? (
+              <img src={user.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center font-display font-bold text-sm">
+                {(user.username || "?")[0].toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1 text-zinc-500 text-[15px] font-display">What&apos;s your trade idea?</div>
+            <span className="text-xs font-bold uppercase tracking-widest bg-white text-black px-3 py-1.5">Post</span>
+          </Link>
+        )}
+
         {loading && <div className="text-center py-20 text-zinc-600 text-xs uppercase tracking-widest">Loading…</div>}
 
         {!loading && tab === "news" && (

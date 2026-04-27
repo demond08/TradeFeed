@@ -41,9 +41,11 @@ export default function FeedPost({ post, viewerId, onChanged }) {
           )}
           <div className="font-semibold text-sm truncate">@{post.author?.username}</div>
         </Link>
-        <span className={`px-2 py-1 text-[11px] font-mono-tab font-bold tracking-wider ${post.side === "SHORT" ? "bg-[#FF3B30] text-white" : "bg-[#00C805] text-black"}`}>
-          {post.ticker} · {post.side}
-        </span>
+        {post.ticker && (
+          <span className={`px-2 py-1 text-[11px] font-mono-tab font-bold tracking-wider ${post.side === "SHORT" ? "bg-[#FF3B30] text-white" : "bg-[#00C805] text-black"}`}>
+            {post.ticker} · {post.side}
+          </span>
+        )}
         {outcome === "win" && (
           <span className={`${pillClass} bg-[#00C805] text-black`} data-testid="outcome-win-badge">
             <CheckCircle2 size={12} /> Win
@@ -80,11 +82,13 @@ export default function FeedPost({ post, viewerId, onChanged }) {
           </div>
         </div>
       ) : (
-        <div className="px-4 pb-2 grid grid-cols-3 gap-2 text-xs font-mono-tab">
-          <div><div className="text-zinc-400 text-[10px] uppercase">Entry</div><div className="font-bold">{post.entry ?? "—"}</div></div>
-          <div><div className="text-zinc-400 text-[10px] uppercase">SL</div><div className="font-bold text-[#FF3B30]">{post.stop_loss ?? "—"}</div></div>
-          <div><div className="text-zinc-400 text-[10px] uppercase">TP</div><div className="font-bold text-[#00C805]">{post.take_profit ?? "—"}</div></div>
-        </div>
+        (post.entry || post.stop_loss || post.take_profit) ? (
+          <div className="px-4 pb-2 grid grid-cols-3 gap-2 text-xs font-mono-tab">
+            <div><div className="text-zinc-400 text-[10px] uppercase">Entry</div><div className="font-bold">{post.entry ?? "—"}</div></div>
+            <div><div className="text-zinc-400 text-[10px] uppercase">SL</div><div className="font-bold text-[#FF3B30]">{post.stop_loss ?? "—"}</div></div>
+            <div><div className="text-zinc-400 text-[10px] uppercase">TP</div><div className="font-bold text-[#00C805]">{post.take_profit ?? "—"}</div></div>
+          </div>
+        ) : null
       )}
 
       {/* Footer */}
@@ -101,7 +105,12 @@ export default function FeedPost({ post, viewerId, onChanged }) {
             <Share2 size={22} />
           </button>
         </div>
-        {post.caption && <p className="text-sm leading-snug"><span className="font-bold mr-2">@{post.author?.username}</span>{post.caption}</p>}
+        {post.caption && (
+          <p className={post.media_url ? "text-sm leading-snug" : "text-[17px] leading-snug font-display font-medium"}>
+            {!post.media_url && <span className="font-bold mr-2 text-zinc-400">@{post.author?.username}</span>}
+            {post.caption}
+          </p>
+        )}
 
         {isMine && outcome === "pending" && (
           <div className="flex gap-2 pt-2">
